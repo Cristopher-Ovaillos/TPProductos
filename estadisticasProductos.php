@@ -102,17 +102,7 @@ function indice_a_mes($index)
     return $mes;
 }
 //Opcion Nº2
-function mesMayorVenta($ventas)
-{
-    $mesMayorIndex = obtenerIndiceMayorVenta($ventas);
-    if ($mesMayorIndex !== -1) {
-        $mes = indice_a_mes($mesMayorIndex);
-        $monto = $ventas[$mesMayorIndex];
-        echo "El mes con mayores ventas es $mes con un monto de $monto\n";
-    } else {
-        echo "No se encontró ningún mes con ventas registradas\n";
-    }
-}
+
 function obtenerIndiceMayorVenta($ventas)
 {
     $tamanio = count($ventas);
