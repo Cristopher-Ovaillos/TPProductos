@@ -4,9 +4,9 @@ function carga_ventas($prodMasVendido)
 {
     $ventas = [];
     foreach ($prodMasVendido as $prod) {
-        $precio=$prod["precioProd"];
-        $cant=$prod["cantProd"];
-        $ventas[]=monto_Venta($precio,$cant);  
+        $precio = $prod["precioProd"];
+        $cant = $prod["cantProd"];
+        $ventas[] = monto_Venta($precio, $cant);
     }
     return $ventas;
 }
@@ -34,7 +34,7 @@ function monto_Venta($precioP, $cantP)
     return $precioP * $cantP;
 }
 //Opcion Nº1
-function opcion_N1(&$ventas, &$prodMasVendido)
+function insertarVenta(&$ventas, &$prodMasVendido)
 {
 
     $mes = solicitarMes();
@@ -42,7 +42,7 @@ function opcion_N1(&$ventas, &$prodMasVendido)
     $precio = solicitar_PrecioU();
     $cantidad = solicitar_Cantidad();
     $total = monto_Venta($precio, $cantidad);
-    $ventas[$mes]+= $total;
+    $ventas[$mes] += $total;
     $valorComparar = monto_Venta($prodMasVendido[$mes]["precioProd"], $prodMasVendido[$mes]["cantProd"]);
 
     // actualizar prodMasVendido
@@ -81,65 +81,73 @@ function solicitar_Cantidad()
     return $cant;
 }
 
-function indice_a_mes($index){
+function indice_a_mes($index)
+{
     $mes = "invalido";
-    $meses[0]="Enero";
-    $meses[1]="Febrero";
-    $meses[2]="Marzo";
-    $meses[3]="Abril";
-    $meses[4]="Mayo";
-    $meses[5]="Junio";
-    $meses[6]="Julio";
-    $meses[7]="Agosto";
-    $meses[8]="Septiembre";
-    $meses[9]="Octubre";
-    $meses[10]="Noviembre";
-    $meses[11]="Diciembre";
-    if ($index >= 0 && $index <= 11) { 
+    $meses[0] = "Enero";
+    $meses[1] = "Febrero";
+    $meses[2] = "Marzo";
+    $meses[3] = "Abril";
+    $meses[4] = "Mayo";
+    $meses[5] = "Junio";
+    $meses[6] = "Julio";
+    $meses[7] = "Agosto";
+    $meses[8] = "Septiembre";
+    $meses[9] = "Octubre";
+    $meses[10] = "Noviembre";
+    $meses[11] = "Diciembre";
+    if ($index >= 0 && $index <= 11) {
         $mes = $meses[$index];
-    } 
+    }
     return $mes;
 }
 //Opcion Nº2
-function opcion_N2($ventas)
+function mesMayorVenta($ventas)
+{
+    $mesMayorIndex = obtenerIndiceMayorVenta($ventas);
+    if ($mesMayorIndex !== -1) {
+        $mes = indice_a_mes($mesMayorIndex);
+        $monto = $ventas[$mesMayorIndex];
+        echo "El mes con mayores ventas es $mes con un monto de $monto\n";
+    } else {
+        echo "No se encontró ningún mes con ventas registradas\n";
+    }
+}
+function obtenerIndiceMayorVenta($ventas)
 {
     $tamanio = count($ventas);
     $monto = 0;
-    $mes = 0;
+    $mes = -1; //no se ha encontrado ningún mes con ventas aún
+
     for ($i = 0; $i < $tamanio; ++$i) {
-
         $var = $ventas[$i];
-
         if ($monto < $var) {
             $mes = $i;
             $monto = $var;
         }
     }
 
-    $str=indice_a_mes($mes);
-
-    echo "  El mes con mayor ventas es: ", $str, "\n";
+    return $mes;
 }
 
-
 //Opcion Nº3
-function opcion_N3($ventas)
+function primerMesSuperaMonto($montoObjetivo, $ventas)
 {
-    $montoObjetivo = solicitar_MontoObjetivo();
     $exito = true;
     $tamanio = count($ventas);
     $it = 0;
+    $encontrado = -1;
     while ($exito && $it < $tamanio) {
 
         if ($ventas[$it] > $montoObjetivo) {
             $exito = false;
-            echo "Informacion completa del mes:\n";
-            echo "Mes:", indice_a_mes($it), " \n";
-            echo "Monto total de ventas: ", $ventas[$it], "\n";
-            
+            $encontrado = $it; //entonces si el supera supera el monto la variable encontrado toma el valor del it
+        } else {
+            $it++;
         }
-        $it++;
     }
+
+    return $encontrado; //contiene el indice del mes que supera el monto si no -1
 }
 
 function solicitar_MontoObjetivo()
@@ -150,40 +158,24 @@ function solicitar_MontoObjetivo()
 }
 
 //Opcion Nº4
-function opcion_N4($ventas, $prodMasVendido){
+function informacionMes($mes, $ventas, $prodMasVendido)
+{
 
-    $mes= solicitarMes();
-    
-    $str= indice_a_mes($mes);
-    echo "<",$str,"> \n";
-    
-    $cant=$prodMasVendido[$mes]["cantProd"];
-    $precio=$prodMasVendido[$mes]["precioProd"];
-    $total=monto_Venta($cant,$precio);
-    echo "El producto con mayor monto de venta:", $prodMasVendido[$mes]["prod"],"\n";
-    echo "Cantidad de Productos Vendidos:", $cant,"\n";
-    echo "Precio Unitario: $", $precio,"\n";
-    echo "Monto de venta del producto: $",  $total,"\n";
-    echo "Monto acumulado de ventas del mes ",  $str,": $",$ventas[$mes],"\n";
-}
+    if ($mes == -1) {
+        echo (" El mes NO EXISTE \n");
+    } else {
+        $str = indice_a_mes($mes);
+        echo "<", $str, "> \n";
 
-function prod_Mas_Ventas($prodMasVendido){
-    $tamanio = count($prodMasVendido);
-    $monto = 0;
-    $mes = 0;
-    for ($i = 0; $i < $tamanio; ++$i) {
-
-        $cant=$prodMasVendido[$i]["cantProd"];
-    $precio=$prodMasVendido[$i]["precioProd"];
-
-        $var = monto_Venta($precio,$cant);
-
-        if ($monto < $var) {
-            $mes = $i;
-            $monto = $var;
-        }
+        $cant = $prodMasVendido[$mes]["cantProd"];
+        $precio = $prodMasVendido[$mes]["precioProd"];
+        $total = monto_Venta($cant, $precio);
+        echo "El producto con mayor monto de venta:", $prodMasVendido[$mes]["prod"], "\n";
+        echo "Cantidad de Productos Vendidos:", $cant, "\n";
+        echo "Precio Unitario: $", $precio, "\n";
+        echo "Monto de venta del producto: $",  $total, "\n";
+        echo "Monto acumulado de ventas del mes ",  $str, ": $", $ventas[$mes], "\n";
     }
-    return $mes;
 }
 
 //Opcion Nº5
@@ -191,14 +183,25 @@ function prod_Mas_Ventas($prodMasVendido){
 //Propociona una salida legible y sea bastante comprensible.
 //Muestra el indice y sus valores asociados a cada indice
 
-function opcion_N5($prodMasVendido){
-    echo"PRODUCTO ORDENADO \n";
+function prodMasVendidoOrdenado($prodMasVendido)
+{
+    echo "PRODUCTO ORDENADO \n";
     $prodMasVendidoOrdenado = ordenarPorBurbuja($prodMasVendido);
     print_r($prodMasVendidoOrdenado);
 }
-function ordenarPorBurbuja($arr) {
+
+function comparacion_Producto($primer_Prod,$segundo_Prod){
+    //funcion para ver si es mayor una venta total que la otra
+    
+    $total_a=monto_Venta($primer_Prod["precioProd"],$primer_Prod["cantProd"]);
+    $total_b=monto_Venta($segundo_Prod["precioProd"],$segundo_Prod["cantProd"]);;
+return ($total_a < $total_b)?1:-1;
+}
+
+function ordenarPorBurbuja($arr)
+{
     $n = count($arr);
-    $arrOrdenado = $arr; 
+    $arrOrdenado = $arr;
 
     for ($i = 0; $i < $n - 1; $i++) {
         for ($j = 0; $j < $n - $i - 1; $j++) {
@@ -227,33 +230,41 @@ function indice_opcion(&$indice, &$ventas, &$prodMasVendido)
 {
     switch ($indice) {
         case 1:
-            opcion_N1($ventas, $prodMasVendido);
+            insertarVenta($ventas, $prodMasVendido);
             break;
         case 2:
-            opcion_N2($ventas);
+            $mesMayorIndex = obtenerIndiceMayorVenta($ventas);
+            informacionMes($mesMayorIndex, $ventas, $prodMasVendido);
             break;
         case 3:
-            opcion_N3($ventas);
+            $montoObjetivo = solicitar_MontoObjetivo();
+            $indexMesSuperacion = primerMesSuperaMonto($montoObjetivo, $ventas);
+            informacionMes($indexMesSuperacion, $ventas, $prodMasVendido);
             break;
         case 4:
-            opcion_N4($ventas,$prodMasVendido);
+            $mes = solicitarMes();
+            informacionMes($mes, $ventas, $prodMasVendido);
             break;
         case 5:
-            opcion_N5($prodMasVendido);
+            //prodMasVendidoOrdenado($prodMasVendido);
+            
+            uasort($prodMasVendido,'comparacion_Producto');
+            print_r($prodMasVendido);
+
             break;
         case 6:
-                echo "SALIENDO DEL MENU\n";
-            break;  
+            echo "SALIENDO DEL MENU\n";
+           
+            break;
     }
 }
 
 function menu_opciones(&$ventas, &$prodMasVendido)
 {
 
-   
+
     do {
-        print_r($prodMasVendido);
-        print_r($ventas);
+
 
         echo "1) ingresar una venta\n";
         echo "2) Mes con mayor monto de ventas \n";
@@ -267,12 +278,15 @@ function menu_opciones(&$ventas, &$prodMasVendido)
         if ($opcion < 1 || $opcion > 6) {
             echo "OPCION INVALIDA! \n";
         } else {
+            echo "\n";
             indice_opcion($opcion, $ventas, $prodMasVendido);
+            echo "\n";
         }
     } while ($opcion != 6);
 }
 
-function solicitarMes() {
+function solicitarMes()
+{
     $meses = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -280,26 +294,23 @@ function solicitarMes() {
     // Solicitar al usuario que ingrese un mes
     do {
         $input = readline("Ingrese el nombre del mes: ");
-        $input = ucfirst(strtolower($input)); 
+        $input = ucfirst(strtolower($input));
     } while (!in_array($input, $meses));
 
     // Obtener el num de la posicion de ese mes en el
-    $indice = array_search($input, $meses) ; 
+    $indice = array_search($input, $meses);
 
     return $indice;
 }
 
 function main()
 {
-    
+
 
     $prodMasVendido = prodMasVendido();
     $ventas = carga_ventas($prodMasVendido);
-
-
     menu_opciones($ventas, $prodMasVendido);
-    print_r($prodMasVendido);
-    print_r($ventas);
 }
 
 main();
+
